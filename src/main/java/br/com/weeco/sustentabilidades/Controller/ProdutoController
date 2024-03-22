@@ -1,0 +1,61 @@
+package br.com.weeco.sustentabilidades.Controller;
+
+import com.example.demo.model.Product;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController // Conclui que a classe é um controlador REST
+
+@RequestMapping("/api/products") // Seleciona a URL base do controlador da API
+public class ProductController {
+
+    private List<Product> products = new ArrayList<>(); // Define uma lista de produtos como uma variável de instância da classe
+
+    @GetMapping // Define o primeiro endpoint do controlador usando a anotação @GetMapping
+    public ResponseEntity<List<Product>> getAllProducts() { 
+        return ResponseEntity.ok(products); // Retorna uma lista de todos os produtos
+    }
+
+    @GetMapping("/{id}") // Define o segundo endpoint do controlador usando a anotação @GetMapping com um parâmetro de caminho {id}
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        Optional<Product> productOptional = products.stream().filter(p -> p.getId().equals(id)).findFirst();
+        if (productOptional.isPresent()) { 
+            return ResponseEntity.ok(productOptional.get()); // Retorna um produto com um ID especificado
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping // Define o terceiro endpoint do controlador usando a anotação @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        products.add(product); // Cria um novo produto usando os dados fornecidos no corpo da solicitação
+        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+    }
+
+    
+    @PutMapping("/{id}") // Define o quarto endpoint do controlador usando a anotação @PutMapping
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+        for (int i = 0; i < products.size(); i++) { // Atualiza um produto com um ID especificado usando os dados fornecidos no corpo da solicitação
+            if (products.get(i).getId().equals(id)) {
+                products.set(i, product);
+                return ResponseEntity.ok(product);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    @DeleteMapping("/{id}") // Define o quinto endpoint do controlador usando a anotação @DeleteMapping
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        for (int i = 0; i < products.size(); i++) { // Exclui um produto com um ID especificado
+            if (products.get(i).getId().equals(id)) {
+                products.remove(i);
+                return ResponseEntity.noContent().build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+}
